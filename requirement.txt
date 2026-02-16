@@ -1,1 +1,1 @@
-selenium==4.8.0
+playwright==1.41.0

@@ -1,53 +1,60 @@
-from selenium import webdriver
-from selenium.webdriver.common.keys import Keys
-from selenium.webdriver.common.by import By
-from selenium.webdriver.support.ui import WebDriverWait
-from selenium.webdriver.support import expected_conditions as EC
+from playwright.sync_api import sync_playwright
 import time
 import csv
 import sys
 
-# initialize selenium driver with chrome
-driver = webdriver.Chrome()
+# global playwright objects
+page = None
+browser = None
+playwright = None
 
-# a function allow selenium go to linkedin login page and login
+# a function to navigate to linkedin login page and wait for manual login
 def login():
-    driver.get("https://www.linkedin.com/uas/login")
+    page.goto("https://www.linkedin.com/uas/login")
     time.sleep(10)
 
-# selenium go to linkedin company page, /people/ is the url of linkedin company employee page, scroll down to bottom repeatingly untill there is no more employee being loaded. 
+# navigate to linkedin company page, /people/ is the url of linkedin company employee page, 
+# scroll down to bottom repeatedly until there are no more employees being loaded. 
 
 def scroll_down(company_name): # add a parameter to pass in the company name
-    driver.get("https://www.linkedin.com/company/" + company_name + "/people/")
-    last_height = driver.execute_script("return document.body.scrollHeight")
+    page.goto("https://www.linkedin.com/company/" + company_name + "/people/")
+    last_height = page.evaluate("document.body.scrollHeight")
     i=0
     while True:
-        driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
+        page.evaluate("window.scrollTo(0, document.body.scrollHeight);")
         time.sleep(2)
-        new_height = driver.execute_script("return document.body.scrollHeight")
+        new_height = page.evaluate("document.body.scrollHeight")
         if new_height == last_height:
             break
         i+=1
         last_height = new_height
-    return driver.find_elements(By.CLASS_NAME, "org-people-profile-card__profile-title")
-# on the selenium page, return all element in div class="org-people-profile-card__profile-title"
+    
+    # Target div class that contains "ember-view lt-line-clamp lt-line-clamp--single-line"
+    # This will grab elements like "John Parker"
+    elements = page.query_selector_all('div.ember-view.lt-line-clamp.lt-line-clamp--single-line')
+    return elements
 
-# end selenium driver
+# end playwright browser
 def end():
-    driver.close()
+    browser.close()
+    playwright.stop()
 
 # main function
 if __name__ == "__main__":
-
+    playwright = sync_playwright().start()
+    browser = playwright.chromium.launch(headless=False)
+    page = browser.new_page()
+    
     login()
     test=scroll_down(sys.argv[1])
     fileout=open(sys.argv[1]+"_employee.csv","w")
     for res in test:
-        #check if res.get_attribute("textContent") is not empty
-        if res.get_attribute("textContent") != "" and res.get_attribute("textContent").strip() != "LinkedIn Member":
+        #check if textContent is not empty
+        text_content = res.text_content()
+        if text_content and text_content.strip() != "" and text_content.strip() != "LinkedIn Member":
             try:
             # strip string res of space and then split by space write all to employee.csv
-                fileout.write(",".join(res.get_attribute("textContent").strip().split(" ")))
+                fileout.write(",".join(text_content.strip().split(" ")))
                 fileout.write("\n")
             except:
                 pass

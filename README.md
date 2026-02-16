@@ -1,17 +1,20 @@
 # Linkedin Name Crawler
 A prototype script to crawl all employee name of a company and save to csv.
 
-Tested on python 3.8, chrome 109.0.5414.120, selenium 4.8.0 and the linkedin frontend on 11/2/2023
+Tested on python 3.8 and playwright 1.41.0
 
 # FOR EDUCATIONAL PURPOSE ONLY!!!
 
 ## Prerequisite
 You need a linkedin account with a lot of connections. (識人好過識字)
 
-## Usage
+## Installation
 ```
 pip install -r requirement.txt
+playwright install chromium
 ```
+
+## Usage
 
 You need to manually enter you linkedin credential as it may trigger captura if you automate the login progress. 
 
