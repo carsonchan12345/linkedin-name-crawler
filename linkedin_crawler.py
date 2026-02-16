@@ -14,20 +14,31 @@ def login():
     time.sleep(10)
 
 # navigate to linkedin company page, /people/ is the url of linkedin company employee page, 
-# scroll down to bottom repeatedly until there are no more employees being loaded. 
+# scroll to bottom, find and click "Load more" button until no more people can be loaded
 
 def scroll_down(company_name): # add a parameter to pass in the company name
     page.goto("https://www.linkedin.com/company/" + company_name + "/people/")
-    last_height = page.evaluate("document.body.scrollHeight")
-    i=0
+    
+    # Keep clicking "Load more" button until it's no longer available
     while True:
+        # Scroll to bottom
         page.evaluate("window.scrollTo(0, document.body.scrollHeight);")
         time.sleep(2)
-        new_height = page.evaluate("document.body.scrollHeight")
-        if new_height == last_height:
+        
+        # Try to find the "Load more" button
+        load_more_button = page.query_selector('button.artdeco-button.artdeco-button--muted.artdeco-button--1.artdeco-button--full.artdeco-button--secondary.ember-view.scaffold-finite-scroll__load-button')
+        
+        if load_more_button:
+            # Button found, click it
+            try:
+                load_more_button.click()
+                time.sleep(2)  # Wait for content to load
+            except:
+                # Button might not be clickable anymore
+                break
+        else:
+            # No more "Load more" button, exit loop
             break
-        i+=1
-        last_height = new_height
     
     # Target div class that contains "ember-view lt-line-clamp lt-line-clamp--single-line"
     # This will grab elements like "John Parker"
