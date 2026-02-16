@@ -16,7 +16,7 @@ playwright install chromium
 
 ## Usage
 
-You need to manually enter you linkedin credential as it may trigger captura if you automate the login progress. 
+You need to manually enter your linkedin credential as it may trigger captcha if you automate the login process. 
 
 The company name is hxxps://www.linkedin.com/company/**company_name**/
 
