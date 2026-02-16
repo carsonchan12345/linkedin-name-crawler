@@ -56,10 +56,5 @@ Tested on Python 3.8 and Playwright 1.41.0.
 - `LOAD_MORE_BUTTON_SELECTOR` — button used to load more employees
 - Name selector: `div.ember-view.lt-line-clamp.lt-line-clamp--single-line`
 
-## Contributing & license
-- Contributions welcome — open an issue or PR.
-- No warranty — use at your own risk.
-
 ---
-
-If you'd like, I can also add a command-line flag for output filename or add CSV headers — tell me which feature you want next. 💡
+💡
