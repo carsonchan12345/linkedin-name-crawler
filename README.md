@@ -1,5 +1,5 @@
 # Linkedin Name Crawler
-A small prototype that opens LinkedIn, goto company's "People" page and extracts all visible employee names into a CSV file. You can use the list of name to form different combination and identify the valid email address. (e.g., for OSINT, phishing, username list, etc)
+A small prototype that opens LinkedIn, goto company's "People" page and extracts all visible employee names into a CSV file. You can use the list of name to form different combination and identify the valid email address. (e.g. for OSINT, phishing, username list, etc)
 
 It was an old project, but now updating it with some VIBE coding!
 
