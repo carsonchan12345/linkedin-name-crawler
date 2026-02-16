@@ -5,7 +5,7 @@ A small prototype that opens LinkedIn, scrolls a company's "People" page and ext
 
 Tested on Python 3.8 and Playwright 1.41.0.
 
-> **FOR EDUCATIONAL PURPOSE ONLY** — use responsibly and respect LinkedIn's terms of service.
+> **FOR EDUCATIONAL PURPOSE ONLY** — use responsibly and respect LinkedIn's terms of service. It was an old project, but now adding some VIBE!
 
 ---
 
