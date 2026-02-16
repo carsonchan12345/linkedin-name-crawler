@@ -32,7 +32,7 @@ Tested on Python 3.8 and Playwright 1.41.0.
 
    Example: `python linkedin_crawler.py google` → output file `google_employee.csv`.
 
-2. The script opens a visible Chromium window and waits (~15s) for you to log in manually. After login it will navigate to the company "People" page and begin scrolling.
+2. The script opens a visible Chromium window and waits (~15s) for you to log in manually. After login it will navigate to the company "People" page and begin scrolling. I tried auto login, but it will very likely trigger CAPTCHA, so I decided to give some window to login instead.
 
 ## Output format
 - Output file: `<company_name>_employee.csv` (no header)
