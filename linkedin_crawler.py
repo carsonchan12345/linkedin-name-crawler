@@ -69,13 +69,19 @@ def end():
 
 # main function
 if __name__ == "__main__":
+    # require at least one argv parameter (company name)
+    if len(sys.argv) < 2:
+        print("Usage: python linkedin_crawler.py <company-name>")
+        sys.exit(1)
+
     playwright = sync_playwright().start()
     browser = playwright.chromium.launch(headless=False)
     page = browser.new_page()
     
     login()
-    test=scroll_down(sys.argv[1])
-    fileout=open(sys.argv[1]+"_employee.csv","w")
+    company = sys.argv[1]
+    test = scroll_down(company)
+    fileout = open(company + "_employee.csv","w")
     for res in test:
         #check if textContent is not empty
         text_content = res.text_content()
