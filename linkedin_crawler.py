@@ -14,19 +14,33 @@ playwright = None
 # a function to navigate to linkedin login page and wait for manual login
 def login():
     page.goto("https://www.linkedin.com/uas/login")
-    time.sleep(10)
+    time.sleep(15)
+    # Wait for feed to confirm login success
+    try:
+        page.wait_for_url("**/feed/**", timeout=10000)
+    except:
+        pass  # Already logged in or still on login page
 
 # navigate to linkedin company page, /people/ is the url of linkedin company employee page, 
 # scroll to bottom, find and click "Load more" button until no more people can be loaded
 
 def scroll_down(company_name): # add a parameter to pass in the company name
-    page.goto("https://www.linkedin.com/company/" + company_name + "/people/")
+    page.goto("https://www.linkedin.com/company/" + company_name + "/people/", wait_until="domcontentloaded")
+    # Wait longer for LinkedIn to load and verify we're on the correct page
+    time.sleep(10)
     
+    # Check if we got redirected
+    current_url = page.url
+    if "/feed/" in current_url or "/people/" not in current_url:
+        print(f"Warning: Redirected to {current_url}. Trying again...")
+        time.sleep(5)
+        page.goto("https://www.linkedin.com/company/" + company_name + "/people/", wait_until="networkidle")
+        time.sleep(10)
     # Keep clicking "Load more" button until it's no longer available
     while True:
         # Scroll to bottom
         page.evaluate("window.scrollTo(0, document.body.scrollHeight);")
-        time.sleep(2)
+        time.sleep(1)
         
         # Try to find the "Load more" button
         load_more_button = page.query_selector(LOAD_MORE_BUTTON_SELECTOR)
@@ -35,7 +49,7 @@ def scroll_down(company_name): # add a parameter to pass in the company name
             # Button found, click it
             try:
                 load_more_button.click()
-                time.sleep(2)  # Wait for content to load
+                time.sleep(2.5)  # Wait for content to load
             except Exception:
                 # Button might not be clickable anymore
                 break
