@@ -3,6 +3,9 @@ import time
 import csv
 import sys
 
+# CSS selector for the "Load more" button on LinkedIn
+LOAD_MORE_BUTTON_SELECTOR = 'button.artdeco-button.artdeco-button--muted.artdeco-button--1.artdeco-button--full.artdeco-button--secondary.ember-view.scaffold-finite-scroll__load-button'
+
 # global playwright objects
 page = None
 browser = None
@@ -26,14 +29,14 @@ def scroll_down(company_name): # add a parameter to pass in the company name
         time.sleep(2)
         
         # Try to find the "Load more" button
-        load_more_button = page.query_selector('button.artdeco-button.artdeco-button--muted.artdeco-button--1.artdeco-button--full.artdeco-button--secondary.ember-view.scaffold-finite-scroll__load-button')
+        load_more_button = page.query_selector(LOAD_MORE_BUTTON_SELECTOR)
         
         if load_more_button:
             # Button found, click it
             try:
                 load_more_button.click()
                 time.sleep(2)  # Wait for content to load
-            except:
+            except Exception:
                 # Button might not be clickable anymore
                 break
         else:
