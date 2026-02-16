@@ -1,22 +1,60 @@
 # Linkedin Name Crawler
-A prototype script to crawl all employee name of a company and save to csv.
+A small prototype that opens LinkedIn, scrolls a company's "People" page and extracts visible employee names into a CSV file. You can use the list of name to form different combination and validate the valid email address.
 
-Tested on python 3.8, chrome 109.0.5414.120, selenium 4.8.0 and the linkedin frontend on 11/2/2023
+**Latest tested:** 2026-02-16  ✅
 
-# FOR EDUCATIONAL PURPOSE ONLY!!!
+Tested on Python 3.8 and Playwright 1.41.0.
 
-## Prerequisite
-You need a linkedin account with a lot of connections. (識人好過識字)
+> **FOR EDUCATIONAL PURPOSE ONLY** — use responsibly and respect LinkedIn's terms of service. It was an old project, but now adding some VIBE!
+
+---
+
+## Quick overview
+- Launches a Chromium browser (visible window), prompts for manual login, visits `https://www.linkedin.com/company/<company_name>/people/`, scrolls and clicks **Load more**, then saves visible names to `<company_name>_employee.csv`.
+- Designed for simple, manual scraping and debugging — not production use.
+
+## Requirements
+- Python 3.13
+- Playwright (see `requirement.txt`)
+- A LinkedIn account with sufficient visibility to view employee names
+
+## Installation (Windows example)
+1. (optional) Create & activate a virtual environment:
+2. Install Python deps:
+   - `pip install -r requirement.txt`
+3. Install Playwright browsers:
+   - `playwright install chromium`
 
 ## Usage
-```
-pip install -r requirement.txt
-```
+1. Run the crawler with the company URL slug (the part after `/company/`):
 
-You need to manually enter you linkedin credential as it may trigger captura if you automate the login progress. 
+   `python linkedin_crawler.py company_name`
 
-The company name is hxxps://www.linkedin.com/company/**company_name**/
+   Example: `python linkedin_crawler.py google` → output file `google_employee.csv`.
 
-```
-python linkedin_crawler.py company_name
-```
+2. The script opens a visible Chromium window and waits (~15s) for you to log in manually. After login it will navigate to the company "People" page and begin scrolling.
+
+## Output format
+- Output file: `<company_name>_employee.csv` (no header)
+- Each scraped name is written as comma-separated tokens derived from splitting the displayed name on spaces.
+  - Example lines: `John,Doe` or `Maria,Del,Rey` (multi-part names become extra columns)
+- The script filters out entries like `LinkedIn Member`.
+
+## Important notes & limitations 
+- Manual login is required (the script waits so you can solve captchas).
+- Name-splitting is naive (splits on spaces); post-process the CSV if you need structured First/Last fields.
+- LinkedIn UI/HTML can change — selectors in `linkedin_crawler.py` may need updates (`LOAD_MORE_BUTTON_SELECTOR` and the name element selector).
+- Use responsibly and only for permitted/ethical purposes.
+
+## Troubleshooting
+- Nothing is written to CSV: ensure you're logged in and can view the company "People" page in the opened browser.
+- Captcha/2FA appears: complete it manually in the browser window, then re-run the script.
+- To change wait timings, edit `time.sleep(...)` values in `linkedin_crawler.py`.
+- To run headless (not recommended for this script), change `headless=False` to `headless=True` in the launch call.
+
+## Where to change selectors
+- `LOAD_MORE_BUTTON_SELECTOR` — button used to load more employees
+- Name selector: `div.ember-view.lt-line-clamp.lt-line-clamp--single-line`
+
+---
+💡

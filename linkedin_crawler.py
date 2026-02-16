@@ -1,53 +1,94 @@
-from selenium import webdriver
-from selenium.webdriver.common.keys import Keys
-from selenium.webdriver.common.by import By
-from selenium.webdriver.support.ui import WebDriverWait
-from selenium.webdriver.support import expected_conditions as EC
+from playwright.sync_api import sync_playwright
 import time
 import csv
 import sys
 
-# initialize selenium driver with chrome
-driver = webdriver.Chrome()
+# CSS selector for the "Load more" button on LinkedIn
+LOAD_MORE_BUTTON_SELECTOR = 'button.artdeco-button.artdeco-button--muted.artdeco-button--1.artdeco-button--full.artdeco-button--secondary.ember-view.scaffold-finite-scroll__load-button'
 
-# a function allow selenium go to linkedin login page and login
+# global playwright objects
+page = None
+browser = None
+playwright = None
+
+# a function to navigate to linkedin login page and wait for manual login
 def login():
-    driver.get("https://www.linkedin.com/uas/login")
-    time.sleep(10)
+    page.goto("https://www.linkedin.com/uas/login")
+    time.sleep(15)
+    # Wait for feed to confirm login success
+    try:
+        page.wait_for_url("**/feed/**", timeout=10000)
+    except:
+        pass  # Already logged in or still on login page
 
-# selenium go to linkedin company page, /people/ is the url of linkedin company employee page, scroll down to bottom repeatingly untill there is no more employee being loaded. 
+# navigate to linkedin company page, /people/ is the url of linkedin company employee page, 
+# scroll to bottom, find and click "Load more" button until no more people can be loaded
 
 def scroll_down(company_name): # add a parameter to pass in the company name
-    driver.get("https://www.linkedin.com/company/" + company_name + "/people/")
-    last_height = driver.execute_script("return document.body.scrollHeight")
-    i=0
+    page.goto("https://www.linkedin.com/company/" + company_name + "/people/", wait_until="domcontentloaded")
+    # Wait longer for LinkedIn to load and verify we're on the correct page
+    time.sleep(10)
+    
+    # Check if we got redirected
+    current_url = page.url
+    if "/feed/" in current_url or "/people/" not in current_url:
+        print(f"Warning: Redirected to {current_url}. Trying again...")
+        time.sleep(5)
+        page.goto("https://www.linkedin.com/company/" + company_name + "/people/", wait_until="networkidle")
+        time.sleep(10)
+    # Keep clicking "Load more" button until it's no longer available
     while True:
-        driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
-        time.sleep(2)
-        new_height = driver.execute_script("return document.body.scrollHeight")
-        if new_height == last_height:
+        # Scroll to bottom
+        page.evaluate("window.scrollTo(0, document.body.scrollHeight);")
+        time.sleep(1)
+        
+        # Try to find the "Load more" button
+        load_more_button = page.query_selector(LOAD_MORE_BUTTON_SELECTOR)
+        
+        if load_more_button:
+            # Button found, click it
+            try:
+                load_more_button.click()
+                time.sleep(2.5)  # Wait for content to load
+            except Exception:
+                # Button might not be clickable anymore
+                break
+        else:
+            # No more "Load more" button, exit loop
             break
-        i+=1
-        last_height = new_height
-    return driver.find_elements(By.CLASS_NAME, "org-people-profile-card__profile-title")
-# on the selenium page, return all element in div class="org-people-profile-card__profile-title"
+    
+    # Target div class that contains "ember-view lt-line-clamp lt-line-clamp--single-line"
+    # This will grab elements like "John Parker"
+    elements = page.query_selector_all('div.ember-view.lt-line-clamp.lt-line-clamp--single-line')
+    return elements
 
-# end selenium driver
+# end playwright browser
 def end():
-    driver.close()
+    browser.close()
+    playwright.stop()
 
 # main function
 if __name__ == "__main__":
+    # require at least one argv parameter (company name)
+    if len(sys.argv) < 2:
+        print("Usage: python linkedin_crawler.py <company-name>")
+        sys.exit(1)
 
+    playwright = sync_playwright().start()
+    browser = playwright.chromium.launch(headless=False)
+    page = browser.new_page()
+    
     login()
-    test=scroll_down(sys.argv[1])
-    fileout=open(sys.argv[1]+"_employee.csv","w")
+    company = sys.argv[1]
+    test = scroll_down(company)
+    fileout = open(company + "_employee.csv","w")
     for res in test:
-        #check if res.get_attribute("textContent") is not empty
-        if res.get_attribute("textContent") != "" and res.get_attribute("textContent").strip() != "LinkedIn Member":
+        #check if textContent is not empty
+        text_content = res.text_content()
+        if text_content and text_content.strip() != "" and text_content.strip() != "LinkedIn Member":
             try:
             # strip string res of space and then split by space write all to employee.csv
-                fileout.write(",".join(res.get_attribute("textContent").strip().split(" ")))
+                fileout.write(",".join(text_content.strip().split(" ")))
                 fileout.write("\n")
             except:
                 pass
