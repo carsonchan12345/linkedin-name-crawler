@@ -5,7 +5,7 @@ It was an old project, but now updating it with some VIBE coding!
 
 **Latest tested:** 2026-02-16  ✅
 
-Tested on Python 3.8 and Playwright 1.41.0.
+Tested on Python 3.13 and Playwright 1.58.0.
 
 > **FOR EDUCATIONAL PURPOSE ONLY** — use responsibly and respect LinkedIn's terms of service. 
 
